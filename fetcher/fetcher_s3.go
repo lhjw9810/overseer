@@ -27,6 +27,7 @@ type S3 struct {
 	Region string
 	Bucket string
 	Key    string
+	Endpoint string
 	//Interval between checks
 	Interval time.Duration
 	//HeadTimeout defaults to 5 seconds
@@ -34,7 +35,6 @@ type S3 struct {
 	//GetTimeout defaults to 5 minutes
 	GetTimeout time.Duration
 	//s3 client options
-	Options []s3.Option
 	//interal state
 	client   *http.Client
 	delay    bool
@@ -88,10 +88,10 @@ func (s *S3) Fetch() (io.Reader, error) {
 		creds = s3.Credentials(s.Access, s.Secret)
 	}
 	opts := []s3.Option{creds, s3.Region(s.Region), s3.Bucket(s.Bucket), s3.Key(s.Key)}
-	if s.Options != nil {
-		opts = append(opts, s.Options...)
-	}
 
+	if len(s.Endpoint) > 0{
+		opts = append(opts, s3.Endpoint(s.Endpoint))
+	}
 	//status check using HEAD
 	req, err := s3.NewRequest("HEAD", opts...)
 	if err != nil {
