@@ -33,6 +33,8 @@ type S3 struct {
 	HeadTimeout time.Duration
 	//GetTimeout defaults to 5 minutes
 	GetTimeout time.Duration
+	//s3 client options
+	Options []s3.Option
 	//interal state
 	client   *http.Client
 	delay    bool
@@ -86,6 +88,10 @@ func (s *S3) Fetch() (io.Reader, error) {
 		creds = s3.Credentials(s.Access, s.Secret)
 	}
 	opts := []s3.Option{creds, s3.Region(s.Region), s3.Bucket(s.Bucket), s3.Key(s.Key)}
+	if s.Options != nil {
+		opts = append(opts, s.Options...)
+	}
+
 	//status check using HEAD
 	req, err := s3.NewRequest("HEAD", opts...)
 	if err != nil {
